@@ -1,26 +1,26 @@
 package hei.school.TD5.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import java.util.List;
 
 @Entity
 @Table(name = "dish")
-@Data
 public class Dish {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private String name;
-    private Double sellingPrice;
 
-    // Relation ManyToMany avec Ingredient
-    @ManyToMany
-    @JoinTable(
-            name = "dish_ingredient",
-            joinColumns = @JoinColumn(name = "dish_id"),
-            inverseJoinColumns = @JoinColumn(name = "ingredient_id")
-    )
-    private List<Ingredient> ingredients;
+    @Column(name = "selling_price")
+    private Double price;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "dish_type")
+    private DishTypeEnum dishType;
+
+    @OneToMany(mappedBy = "dish", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<DishIngredient> dishIngredients;
+
+    // Méthodes métier : getDishCost(), getGrossMargin()...
 }

@@ -24,11 +24,78 @@ public class Ingredient {
     @OneToMany(mappedBy = "ingredient", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<StockMovement> stockMovements;
 
-    // Getters, setters, constructeurs...
+    public Ingredient(Integer id, CategoryEnum category, String name, Double price, List<StockMovement> stockMovements) {
+        this.id = id;
+        this.category = category;
+        this.name = name;
+        this.price = price;
+        this.stockMovements = stockMovements;
+    }
 
-    // Méthode métier (existante) pour calculer le stock à une date
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public CategoryEnum getCategory() {
+        return category;
+    }
+
+    public void setCategory(CategoryEnum category) {
+        this.category = category;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
+    public List<StockMovement> getStockMovements() {
+        return stockMovements;
+    }
+
+    public void setStockMovements(List<StockMovement> stockMovements) {
+        this.stockMovements = stockMovements;
+    }
+
     public StockValue getStockValueAt(Instant t) {
-        if (stockMovements == null) return null;
-        // ... même code que dans l'ancienne classe Ingredient
+        if (stockMovementList == null) return null;
+        Map<Unit, List<StockMovement>> unitSet = stockMovementList.stream()
+                .collect(Collectors.groupingBy(stockMovement -> stockMovement.getValue().getUnit()));
+        if (unitSet.keySet().size() > 1) {
+            throw new RuntimeException("Multiple unit found and not handle for conversion");
+        }
+
+        List<StockMovement> stockMovements = stockMovementList.stream()
+                .filter(stockMovement -> !stockMovement.getCreationDatetime().isAfter(t))
+                .toList();
+        double movementIn = stockMovements.stream()
+                .filter(stockMovement -> stockMovement.getType().equals(MovementTypeEnum.IN))
+                .flatMapToDouble(stockMovement -> DoubleStream.of(stockMovement.getValue().getQuantity()))
+                .sum();
+        double movementOut = stockMovements.stream()
+                .filter(stockMovement -> stockMovement.getType().equals(MovementTypeEnum.OUT))
+                .flatMapToDouble(stockMovement -> DoubleStream.of(stockMovement.getValue().getQuantity()))
+                .sum();
+
+        StockValue stockValue = new StockValue();
+        stockValue.setQuantity(movementIn - movementOut);
+        stockValue.setUnit(unitSet.keySet().stream().findFirst().get());
+
+        return stockValue;
     }
 }

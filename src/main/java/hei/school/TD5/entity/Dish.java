@@ -22,5 +22,22 @@ public class Dish {
     @OneToMany(mappedBy = "dish", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<DishIngredient> dishIngredients;
 
-    // Méthodes métier : getDishCost(), getGrossMargin()...
+    public Double getDishCost() {
+        double totalPrice = 0;
+        for (DishIngredient dishIngredient : dishIngredients) {
+            Double quantity = dishIngredient.getQuantity();
+            if (quantity == null) {
+                throw new RuntimeException("Some ingredients have undefined quantity");
+            }
+            totalPrice = totalPrice + dishIngredient.getIngredient().getPrice() * quantity;
+        }
+        return totalPrice;
+    }
+
+    public Double getGrossMargin() {
+        if (price == null) {
+            throw new RuntimeException("Price is null");
+        }
+        return price - getDishCost();
+    }
 }

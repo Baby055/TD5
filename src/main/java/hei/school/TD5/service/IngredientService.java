@@ -35,18 +35,13 @@ public class IngredientService {
             return null;
         }
 
-        // Récupérer tous les mouvements de l'ingrédient avant la date
         List<StockMovement> movements = stockMovementRepository.findByIngredientIdAndCreationDatetimeBefore(ingredientId, date);
 
-        // Utiliser la méthode métier de l'entité Ingredient (mais elle nécessite que la liste des mouvements soit chargée)
-        // On peut créer un objet Ingredient temporaire avec ces mouvements pour calculer le stock
         Ingredient ingredient = new Ingredient();
         ingredient.setStockMovements(movements);
         StockValue stock = ingredient.getStockValueAt(date);
 
-        // Vérifier l'unité (si différent, on pourrait convertir mais ici on suppose même unité)
         if (stock != null && !stock.getUnit().name().equalsIgnoreCase(unit)) {
-            // Option : convertir ou retourner une erreur. Le TD ne demande pas de conversion.
             throw new IllegalArgumentException("Unité demandée différente de l'unité du stock");
         }
         return stock;

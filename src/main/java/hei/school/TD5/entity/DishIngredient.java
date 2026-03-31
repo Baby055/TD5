@@ -1,25 +1,14 @@
 package hei.school.TD5.entity;
 
-import jakarta.persistence.*;
-
-@Entity
-@Table(name = "dish_ingredient")
 public class DishIngredient {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "id_dish")
     private Dish dish;
 
-    @ManyToOne
-    @JoinColumn(name = "id_ingredient")
     private Ingredient ingredient;
 
     private Double quantity;
 
-    @Enumerated(EnumType.STRING)
     private Unit unit;
 
     public Integer getId() {

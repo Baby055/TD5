@@ -47,8 +47,6 @@ public class DishService {
                 .collect(Collectors.toList());
         List<Ingredient> existingIngredients = ingredientRepository.findAllById(ingredientIds);
 
-        dish.getDishIngredients().clear();
-
         // Création des nouveaux DishIngredient
         List<DishIngredient> newDishIngredients = new ArrayList<>();
         for (Ingredient ing : existingIngredients) {
@@ -61,7 +59,7 @@ public class DishService {
         }
         dish.setDishIngredients(newDishIngredients);
 
-        dishRepository.save(dish);
+        dishRepository.updateDishIngredients(dish.getId(), newDishIngredients);
         return true;
     }
 

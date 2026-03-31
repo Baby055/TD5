@@ -1,26 +1,16 @@
 package hei.school.TD5.entity;
-
-import jakarta.persistence.*;
 import java.time.Instant;
 
-@Entity
-@Table(name = "stock_movement")
 public class StockMovement {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "id_ingredient")
     private Ingredient ingredient;
 
-    @Enumerated(EnumType.STRING)
     private MovementTypeEnum type;
 
     private Instant creationDatetime;
 
-    @Embedded
-    private StockValue value;   // StockValue est un objet valeur (Embeddable)
+    private StockValue value;
 
     public Integer getId() {
         return id;

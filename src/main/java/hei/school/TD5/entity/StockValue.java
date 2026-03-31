@@ -1,14 +1,8 @@
 package hei.school.TD5.entity;
 
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-
-@Embeddable
 public class StockValue {
     private Double quantity;
 
-    @Enumerated(EnumType.STRING)
     private Unit unit;
 
     // constructeurs, getters, setters...

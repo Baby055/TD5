@@ -64,4 +64,33 @@ public class DishService {
         dishRepository.save(dish);
         return true;
     }
+
+    //TD6
+    public List<Ingredient> getIngredientsByDishIdWithFilters(Integer dishId,
+                                                              String ingredientName,
+                                                              Double ingredientPriceAround) {
+        Dish dish = dishRepository.findById(dishId)
+                .orElseThrow(() -> new RuntimeException("Dish not found"));
+
+        List<Ingredient> ingredients = dish.getDishIngredients().stream()
+                .map(DishIngredient::getIngredient)
+                .collect(Collectors.toList());
+
+        if (ingredientName != null && !ingredientName.isBlank()) {
+            String lowerName = ingredientName.toLowerCase();
+            ingredients = ingredients.stream()
+                    .filter(i -> i.getName().toLowerCase().contains(lowerName))
+                    .collect(Collectors.toList());
+        }
+
+        if (ingredientPriceAround != null) {
+            double min = ingredientPriceAround - 50;
+            double max = ingredientPriceAround + 50;
+            ingredients = ingredients.stream()
+                    .filter(i -> i.getPrice() >= min && i.getPrice() <= max)
+                    .collect(Collectors.toList());
+        }
+
+        return ingredients;
+    }
 }

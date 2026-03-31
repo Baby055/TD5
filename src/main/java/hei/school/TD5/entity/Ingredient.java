@@ -24,6 +24,8 @@ public class Ingredient {
     @OneToMany(mappedBy = "ingredient", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<StockMovement> stockMovements;
 
+    public Ingredient() {}
+
     public Ingredient(Integer id, CategoryEnum category, String name, Double price, List<StockMovement> stockMovements) {
         this.id = id;
         this.category = category;
@@ -73,23 +75,27 @@ public class Ingredient {
     }
 
     public StockValue getStockValueAt(Instant t) {
-        if (stockMovementList == null) return null;
-        Map<Unit, List<StockMovement>> unitSet = stockMovementList.stream()
-                .collect(Collectors.groupingBy(stockMovement -> stockMovement.getValue().getUnit()));
+        if (stockMovements == null) return null;
+
+        Map<Unit, List<StockMovement>> unitSet = stockMovements.stream()
+                .collect(Collectors.groupingBy(sm -> sm.getValue().getUnit()));
+
         if (unitSet.keySet().size() > 1) {
-            throw new RuntimeException("Multiple unit found and not handle for conversion");
+            throw new RuntimeException("Multiple units found");
         }
 
-        List<StockMovement> stockMovements = stockMovementList.stream()
-                .filter(stockMovement -> !stockMovement.getCreationDatetime().isAfter(t))
+        List<StockMovement> filtered = stockMovements.stream()
+                .filter(sm -> !sm.getCreationDatetime().isAfter(t))
                 .toList();
-        double movementIn = stockMovements.stream()
-                .filter(stockMovement -> stockMovement.getType().equals(MovementTypeEnum.IN))
-                .flatMapToDouble(stockMovement -> DoubleStream.of(stockMovement.getValue().getQuantity()))
+
+        double movementIn = filtered.stream()
+                .filter(sm -> sm.getType() == MovementTypeEnum.IN)
+                .flatMapToDouble(sm -> DoubleStream.of(sm.getValue().getQuantity()))
                 .sum();
-        double movementOut = stockMovements.stream()
-                .filter(stockMovement -> stockMovement.getType().equals(MovementTypeEnum.OUT))
-                .flatMapToDouble(stockMovement -> DoubleStream.of(stockMovement.getValue().getQuantity()))
+
+        double movementOut = filtered.stream()
+                .filter(sm -> sm.getType() == MovementTypeEnum.OUT)
+                .flatMapToDouble(sm -> DoubleStream.of(sm.getValue().getQuantity()))
                 .sum();
 
         StockValue stockValue = new StockValue();
